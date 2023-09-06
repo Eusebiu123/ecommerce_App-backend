@@ -93,8 +93,7 @@ public class ProductServiceImplementation implements ProductService{
     public String deleteProduct(Long productId) throws ProductException {
         Product product=findProductById(productId);
         product.getSizes().clear();
-//        productRepository.delete(product);
-        productRepository.deleteById(productId);
+        productRepository.delete(product);
         return "Product deleted Successfully";
     }
 
@@ -128,7 +127,6 @@ public class ProductServiceImplementation implements ProductService{
     public Page<Product> getAllProduct(String category, List<String> colors, List<String> sizes, Integer minPrice, Integer maxPrice, Integer minDiscount, String sort, String stock, Integer pageNumber, Integer pageSize) {
 
         Pageable pageable= PageRequest.of(pageNumber,pageSize);
-        //(2,4) 4*(2-1) pageSize*(pageNumber-1)
         List<Product> products = productRepository.filterProducts(category,minPrice,maxPrice,minDiscount,sort);
         if(!colors.isEmpty())
         {
@@ -144,7 +142,6 @@ public class ProductServiceImplementation implements ProductService{
             }
         }
         int startIndex=(int) pageable.getOffset();
-        System.out.println("start index "+startIndex);
         int endIndex=Math.min(startIndex+ pageable.getPageSize(),products.size());
 
         List<Product> pageContent = products.subList(startIndex,endIndex);
