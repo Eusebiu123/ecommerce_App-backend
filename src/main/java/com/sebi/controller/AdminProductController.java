@@ -48,12 +48,12 @@ public class AdminProductController {
     }
 
     @PostMapping("/creates")
-    public ResponseEntity<ApiResponse> createMultipleProduct(@RequestBody CreateProductRequest[] req){
+    public ResponseEntity<ApiResponse> createMultipleProducts(@RequestBody CreateProductRequest[] req){
         for(CreateProductRequest product : req){
             productService.createProduct(product);
         }
         ApiResponse res = new ApiResponse();
-        res.setMessage("product deleted successfully");
+        res.setMessage("products added successfully");
         res.setStatus(true);
 
         return new ResponseEntity<>(res,HttpStatus.CREATED);

@@ -32,7 +32,7 @@ public class UserServiceImplementation implements UserService {
         String email = jwtProvider.getEmailFromToken(jwt);
         User user = userRepository.findByEmail(email);
         if(user==null){
-            throw new UserException("user not found with this email"+email);
+            throw new UserException("user not found with this email: "+email);
         }
         return user;
     }
