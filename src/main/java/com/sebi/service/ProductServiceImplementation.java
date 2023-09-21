@@ -93,7 +93,8 @@ public class ProductServiceImplementation implements ProductService{
     public String deleteProduct(Long productId) throws ProductException {
         Product product=findProductById(productId);
         product.getSizes().clear();
-        productRepository.delete(product);
+//        productRepository.delete(product);
+        productRepository.deleteById(productId);
         return "Product deleted Successfully";
     }
 
