@@ -14,11 +14,11 @@ import com.paypal.base.rest.PayPalRESTException;
 @Configuration
 public class PayPalConfig {
 
-    @Value("${paypal.client.id}")
+    @Value("${ppl-id}")
     private String clientId;
-    @Value("${paypal.client.secret}")
+    @Value("${ppl-sec}")
     private String clientSecret;
-    @Value("${paypal.mode}")
+    @Value("${ppl-md}")
     private String mode;
 
     @Bean
