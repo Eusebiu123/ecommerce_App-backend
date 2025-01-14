@@ -1,5 +1,6 @@
 package com.sebi.controller;
 
+import com.sebi.exception.CartItemException;
 import com.sebi.exception.OrderException;
 import com.sebi.exception.UserException;
 import com.sebi.model.Address;
@@ -23,7 +24,7 @@ public class OrderController {
     private UserService userService;
     @PostMapping("/")
     public ResponseEntity<Order> createOrder(@RequestBody Address shippingAddress,
-                                             @RequestHeader("Authorization") String jwt) throws UserException{
+                                             @RequestHeader("Authorization") String jwt) throws UserException, CartItemException {
         User user=userService.findUserProfileByJwt(jwt);
         Order order = orderService.createOrder(user,shippingAddress);
 

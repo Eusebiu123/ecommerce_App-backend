@@ -34,12 +34,7 @@ public class AdminProductController {
         return new ResponseEntity<>(res,HttpStatus.OK);
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<List<Product>> findAllProduct(){
-        List<Product> products = productService.findAllProducts();
 
-        return new ResponseEntity<>(products,HttpStatus.OK);
-    }
 
     @PutMapping("/{productId}/update")
     public ResponseEntity<Product> updateProduct(@RequestBody Product req,@PathVariable Long productId) throws ProductException{

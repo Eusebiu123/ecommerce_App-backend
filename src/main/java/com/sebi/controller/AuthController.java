@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -30,11 +32,13 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
     private CustomeUserServiceImplementation customUserService;
     private CartService cartService;
-    public AuthController(UserRepository userRepository,CustomeUserServiceImplementation customUserService,PasswordEncoder passwordEncoder,JwtProvider jwtProvider,CartService cartService){
+
+    public AuthController(UserRepository userRepository, CustomeUserServiceImplementation customUserService, PasswordEncoder passwordEncoder, JwtProvider jwtProvider,  CartService cartService){
         this.userRepository=userRepository;
         this.customUserService=customUserService;
         this.passwordEncoder=passwordEncoder;
         this.jwtProvider=jwtProvider;
+
         this.cartService=cartService;
     }
     @PostMapping("/signup")
@@ -43,6 +47,7 @@ public class AuthController {
         String password = user.getPassword();
         String firstName = user.getFirstName();
         String lastName= user.getLastName();
+        String role = user.getRole();
 
         User isEmailExist =userRepository.findByEmail(email);
 
@@ -55,6 +60,9 @@ public class AuthController {
         createdUser.setPassword(passwordEncoder.encode(password));
         createdUser.setFirstName(firstName);
         createdUser.setLastName(lastName);
+        createdUser.setRole(role);
+
+        String jwt = jwtProvider.generateTokenForMe(createdUser);
 
         User savedUser= userRepository.save(createdUser);
         Cart cart= cartService.createCart(savedUser);
@@ -67,6 +75,8 @@ public class AuthController {
         AuthResponse authResponse =new AuthResponse();
         authResponse.setJwt(token);
         authResponse.setMessage("SignUp success");
+
+
         return new ResponseEntity<AuthResponse>(authResponse, HttpStatus.CREATED);
 
 
@@ -77,10 +87,14 @@ public class AuthController {
         String username=loginRequest.getEmail();
         String password =loginRequest.getPassword();
 
+
+
         Authentication authentication = authenticate(username,password);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String token=jwtProvider.generateToken(authentication);
+        User user = userRepository.findByEmail(username);
+
 
         AuthResponse authResponse =new AuthResponse(token,"Signin Success");
         return new ResponseEntity<AuthResponse>(authResponse, HttpStatus.CREATED);
@@ -96,6 +110,9 @@ public class AuthController {
         if(!passwordEncoder.matches(password,userDetails.getPassword())){
             throw new BadCredentialsException("invalid password");
         }
+
         return new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
     }
+
+
 }

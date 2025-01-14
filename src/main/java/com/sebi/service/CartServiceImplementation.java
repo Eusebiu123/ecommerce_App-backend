@@ -36,6 +36,7 @@ public class CartServiceImplementation implements CartService {
 
     @Override
     public String addCartItem(Long userId, AddItemRequest req) throws ProductException {
+
         Cart cart = cartRepository.findByUserId(userId);
         Product product = productService.findProductById(req.getProductId());
 
@@ -54,6 +55,7 @@ public class CartServiceImplementation implements CartService {
 
             CartItem createdCartItem = cartItemService.createCartItem(cartItem);
             cart.getCartItems().add(createdCartItem);
+            cartRepository.save(cart);
 
         }
         return "Item Add to Cart";

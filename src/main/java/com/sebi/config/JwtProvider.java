@@ -1,5 +1,6 @@
 package com.sebi.config;
 
+import com.sebi.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -17,6 +18,14 @@ public class JwtProvider {
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime()+846000000))
                 .claim("email",auth.getName())
+                .signWith(key).compact();
+        return jwt;
+    }
+    public String generateTokenForMe(User user){
+        String jwt= Jwts.builder()
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(new Date().getTime()+846000000))
+                .claim("email",user.getEmail())
                 .signWith(key).compact();
         return jwt;
     }

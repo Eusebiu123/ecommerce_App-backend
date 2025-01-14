@@ -2,6 +2,7 @@ package com.sebi.controller;
 
 import com.sebi.exception.ProductException;
 import com.sebi.model.Product;
+import com.sebi.response.ApiResponse;
 import com.sebi.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -37,6 +38,20 @@ public class ProductController {
         Product product = productService.findProductById(productId);
 
         return new ResponseEntity<Product>(product,HttpStatus.ACCEPTED);
+    }
+    @GetMapping("products/all")
+    public ResponseEntity<List<Product>> findAllProduct(){
+        List<Product> products = productService.findAllProducts();
+
+        return new ResponseEntity<>(products,HttpStatus.OK);
+    }
+
+    @DeleteMapping("/products/id/{productId}")
+    public ResponseEntity<ApiResponse> deleteProductById(@PathVariable Long productId) throws ProductException{
+        String res = productService.deleteProduct(productId);
+        ApiResponse response = new ApiResponse();
+        response.setMessage(res);
+        return new ResponseEntity<ApiResponse>(response,HttpStatus.OK);
     }
 
     @GetMapping("/products/search")

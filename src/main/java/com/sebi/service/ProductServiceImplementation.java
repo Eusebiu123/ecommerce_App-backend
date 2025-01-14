@@ -115,7 +115,7 @@ public class ProductServiceImplementation implements ProductService{
         {
             return opt.get();
         }
-        throw new ProductException("Product not found with id"+id);
+        throw new ProductException("Product not found with id "+id);
     }
 
     @Override

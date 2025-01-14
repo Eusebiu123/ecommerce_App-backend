@@ -1,8 +1,8 @@
 package com.sebi.model;
 
 public class Size {
-    private String name;
-    private int quantity;
+    private String name;                                                        //xxl ,l,xl
+    private int quantity;                                                                      //6
 
     public String getName() {
         return name;

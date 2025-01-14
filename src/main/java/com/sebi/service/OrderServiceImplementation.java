@@ -1,18 +1,23 @@
 package com.sebi.service;
 
+import com.sebi.exception.CartItemException;
 import com.sebi.exception.OrderException;
+import com.sebi.exception.UserException;
 import com.sebi.model.*;
 import com.sebi.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class OrderServiceImplementation  implements OrderService{
     private CartRepository cartRepository;
+    private CartItemRepository cartItemRepository;
+    private ProductRepository productRepository;
+    private CartItemService cartItemService;
     private CartService cartService;
     private ProductService productService;
     private OrderRepository orderRepository;
@@ -21,17 +26,21 @@ public class OrderServiceImplementation  implements OrderService{
     private OrderItemService orderItemService;
     private OrderItemRepository orderItemRepository;
 
-    public OrderServiceImplementation(CartService cartService, OrderRepository orderRepository, AddressRepository addressRepository, UserRepository userRepository, OrderItemService orderItemService, OrderItemRepository orderItemRepository) {
+    public OrderServiceImplementation(CartService cartService, OrderRepository orderRepository, AddressRepository addressRepository, UserRepository userRepository, OrderItemService orderItemService, OrderItemRepository orderItemRepository,ProductRepository productRepository,CartItemRepository cartItemRepository,CartRepository cartRepository,CartItemService cartItemService) {
         this.cartService = cartService;
         this.orderRepository = orderRepository;
         this.addressRepository = addressRepository;
         this.userRepository = userRepository;
         this.orderItemService = orderItemService;
         this.orderItemRepository = orderItemRepository;
+        this.productRepository = productRepository;
+        this.cartItemRepository=cartItemRepository;
+        this.cartRepository=cartRepository;
+        this.cartItemService=cartItemService;
     }
 
     @Override
-    public Order createOrder(User user, Address shippingAddress) {
+    public Order createOrder(User user, Address shippingAddress) throws CartItemException, UserException {
         shippingAddress.setUser(user);
         Address address = addressRepository.save(shippingAddress);
         user.getAddress().add(address);
@@ -53,6 +62,27 @@ public class OrderServiceImplementation  implements OrderService{
             OrderItem createdOrderItem = orderItemRepository.save(orderItem);
             orderItems.add(createdOrderItem);
 
+            //update product
+            String sizeToBeUpdated = item.getSize();
+            int quantityOfSize = item.getQuantity();
+            Product productToBeUpdated = item.getProduct();
+            Set<Size> sizes = new HashSet<>();
+            sizes = productToBeUpdated.getSizes();
+            Set<Size> newSizes = new HashSet<>();
+            for( Size i : sizes){
+                if(Objects.equals(i.getName(), sizeToBeUpdated)){
+                      int newQuantity = i.getQuantity()-quantityOfSize;
+                      if(newQuantity>0) {
+                          i.setQuantity(newQuantity);
+                          newSizes.add(i);
+                      }
+                }
+                else{
+                    newSizes.add(i);
+                }
+            }
+            productToBeUpdated.setSizes(newSizes);
+            productRepository.save(productToBeUpdated);
         }
         Order createdOrder = new Order();
         createdOrder.setUser(user);
@@ -74,6 +104,12 @@ public class OrderServiceImplementation  implements OrderService{
             item.setOrder(savedOrder);
             orderItemRepository.save(item);
         }
+
+        //delete user items from cart
+        Long userId = user.getId();
+        cartRepository.deleteById(userId);
+        cartService.createCart(user);
+
         return savedOrder;
 
     }

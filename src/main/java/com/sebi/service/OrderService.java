@@ -1,6 +1,8 @@
 package com.sebi.service;
 
+import com.sebi.exception.CartItemException;
 import com.sebi.exception.OrderException;
+import com.sebi.exception.UserException;
 import com.sebi.model.Address;
 import com.sebi.model.Order;
 import com.sebi.model.User;
@@ -8,7 +10,7 @@ import com.sebi.model.User;
 import java.util.List;
 
 public interface OrderService {
-    public Order createOrder(User user, Address shippingAddress);
+    public Order createOrder(User user, Address shippingAddress) throws CartItemException, UserException;
     public Order findOrderById(Long orderId) throws OrderException;
 
     public List<Order> userOrderHistory(Long userId);
