@@ -10,7 +10,7 @@ public class CartItem {
     private Long id;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private Cart cart;
 
     @ManyToOne

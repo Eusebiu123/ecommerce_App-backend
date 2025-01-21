@@ -38,7 +38,7 @@ public class OrderServiceImplementation  implements OrderService{
         this.cartRepository=cartRepository;
         this.cartItemService=cartItemService;
     }
-
+    @Transactional
     @Override
     public Order createOrder(User user, Address shippingAddress) throws CartItemException, UserException {
         shippingAddress.setUser(user);
@@ -104,12 +104,14 @@ public class OrderServiceImplementation  implements OrderService{
             item.setOrder(savedOrder);
             orderItemRepository.save(item);
         }
-
-        //delete user items from cart
-        Long userId = user.getId();
-        cartRepository.deleteById(userId);
-        cartService.createCart(user);
-
+//remove cartItems from cart
+        for(CartItem cartItem : cartItemRepository.findAll()){
+            if(cartItem.getUserId().equals(user.getId())){
+                cart.getCartItems().remove(cartItem);
+                cartItem.setCart(null);
+            }
+        }
+        cartRepository.save(cart);
         return savedOrder;
 
     }

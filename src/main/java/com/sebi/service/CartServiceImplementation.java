@@ -10,6 +10,9 @@ import com.sebi.repository.ProductRepository;
 import com.sebi.request.AddItemRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Service
 public class CartServiceImplementation implements CartService {
 
@@ -70,6 +73,12 @@ public class CartServiceImplementation implements CartService {
         int totalDiscountedPrice=0;
         int totalItem=0;
 
+        if(cart.getCartItems() == null)
+        {
+            Set<CartItem> set = new HashSet<>();
+            cart.setCartItems(set);
+            return cartRepository.save(cart);
+        }
         for(CartItem cartItem :cart.getCartItems()){
             totalPrice=totalPrice+cartItem.getPrice();
             totalDiscountedPrice=totalDiscountedPrice+cartItem.getDiscountedPrice();
@@ -82,4 +91,5 @@ public class CartServiceImplementation implements CartService {
 
         return cartRepository.save(cart);
     }
+
 }
