@@ -38,7 +38,8 @@ public class CartItemServiceImplementation implements CartItemService{
     @Override
     public CartItem updateCartItem(Long userId, Long id, CartItem cartItem) throws CartItemException, UserException {
         CartItem item = findCartItemById(id);
-        User user = userService.findUserById(item.getUserId());
+//        User user = userService.findUserById(item.getUserId());
+        User user = new User();
         if(user.getId().equals(userId)){
             item.setQuantity(cartItem.getQuantity());
             item.setPrice(item.getQuantity()*item.getProduct().getPrice());
@@ -58,10 +59,10 @@ public class CartItemServiceImplementation implements CartItemService{
     public void removeCartItem(Long userId, Long cartItemId) throws CartItemException, UserException {
         CartItem cartItem = findCartItemById(cartItemId);
 
-        User user = userService.findUserById(cartItem.getUserId());
-
-        User reqUser = userService.findUserById(userId);
-
+//        User user = userService.findUserById(cartItem.getUserId());
+        User user = new User();
+//        User reqUser = userService.findUserById(userId);
+        User reqUser = new User();
         if(user.getId().equals(reqUser.getId())){
             cartItemRepository.deleteById(cartItemId);
         }

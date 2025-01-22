@@ -1,32 +1,41 @@
 package com.sebi.controller;
 
+import com.sebi.config.JwtService;
 import com.sebi.exception.ProductException;
 import com.sebi.exception.UserException;
 import com.sebi.model.Review;
 import com.sebi.model.User;
+import com.sebi.repository.UserRepository;
 import com.sebi.request.ReviewRequest;
 import com.sebi.service.ReviewService;
-import com.sebi.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/reviews")
 public class ReviewController {
 
     private ReviewService reviewService;
-    private UserService userService;
+    private JwtService jwtService;
+    private UserRepository userRepository;
 
     @PostMapping("/create")
     public ResponseEntity<Review> createReview(@RequestBody ReviewRequest req,
                                                @RequestHeader("Authorization") String jwt) throws UserException, ProductException{
-        User user = userService.findUserProfileByJwt(jwt);
-        Review review = reviewService.createReview(req,user);
-
-        return new ResponseEntity<>(review, HttpStatus.CREATED);
+        String token = jwtService.extractBearer(jwt);
+        String username = jwtService.extractUserName(token);
+        Optional<User> user = userRepository.findByUsername(username);
+        if(user.isPresent()) {
+            User newUser = user.get();
+            Review review = reviewService.createReview(req, newUser);
+            return new ResponseEntity<>(review, HttpStatus.CREATED);
+        }else{
+            throw new UserException("User not found!");
+        }
     }
 
     @GetMapping("/product/{productId}")
