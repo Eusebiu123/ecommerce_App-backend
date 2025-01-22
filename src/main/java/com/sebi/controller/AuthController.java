@@ -20,10 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -45,6 +42,11 @@ public class AuthController {
     {
         AuthResponse authResponse = userService.login(loginRequest);
         return new ResponseEntity<AuthResponse>(authResponse, HttpStatus.CREATED);
+    }
+    @PostMapping("/logout")
+    public ResponseEntity<AuthResponse> logoutUserHandler(@RequestHeader("Authorization") String jwt) throws UserException {
+        AuthResponse authResponse = userService.logout(jwt);
+        return new ResponseEntity<AuthResponse>(authResponse, HttpStatus.OK);
     }
 
 

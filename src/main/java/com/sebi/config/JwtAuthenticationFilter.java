@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -49,6 +50,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 ));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
 
+            }else{
+                throw new AccessDeniedException("You don't have access to this!");
             }
         }
         filterChain.doFilter(request,response);

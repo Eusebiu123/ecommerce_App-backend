@@ -1,8 +1,11 @@
 package com.sebi.service;
 
 import com.sebi.config.JwtService;
+import com.sebi.exception.UserException;
 import com.sebi.model.Cart;
+import com.sebi.model.Token;
 import com.sebi.model.User;
+import com.sebi.repository.TokenRepository;
 import com.sebi.repository.UserRepository;
 import com.sebi.request.LoginRequest;
 import com.sebi.response.AuthResponse;
@@ -16,6 +19,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @AllArgsConstructor
 @Service
 public class AuthService {
@@ -25,6 +31,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final CartService cartService;
     private final UserService userService;
+    private final TokenRepository tokenRepository;
 
     public AuthResponse register(User request)
     {
@@ -36,9 +43,30 @@ public class AuthService {
         user.setRole(request.getRole());
         user= userRepository.save(user);
         Cart cart = cartService.createCart(user);
+
         String jwt = jwtService.generateToken(user);
+        saveUserToken(jwt, user);
+
 
         return new AuthResponse(jwt,"User register successfully!");
+    }
+
+    private void saveUserToken(String jwt, User user) {
+        Token token = new Token();
+        token.setToken(jwt);
+        token.setLoggedOut(false);
+        token.setUser(user);
+        tokenRepository.save(token);
+    }
+    private void revokeAllTokenByUser(User user) {
+        List<Token> validTokenListByUser = tokenRepository.findAllTokenByUser(user.getId());
+
+        if(!validTokenListByUser.isEmpty()){
+            validTokenListByUser.forEach(t->{
+                t.setLoggedOut(true);
+            });
+        }
+        tokenRepository.saveAll(validTokenListByUser);
     }
 
     public AuthResponse login(User request)
@@ -50,6 +78,8 @@ public class AuthService {
         User user = userRepository.findByUsername(request.getUsername()).orElseThrow();
 
         String token = jwtService.generateToken(user);
+        revokeAllTokenByUser(user);
+        saveUserToken(token,user);
 
         return new AuthResponse(token,"User authenticated successfully!");
     }
@@ -62,5 +92,21 @@ public class AuthService {
             throw new BadCredentialsException("invalid password");
         }
         return new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+    }
+
+    public AuthResponse logout(String jwt) throws UserException {
+        String token = jwtService.extractBearer(jwt);
+        String username = jwtService.extractUserName(token);
+        Optional<User> user = userRepository.findByUsername(username);
+        if(user.isPresent()){
+            SecurityContextHolder.clearContext();
+            User userFound = user.get();
+            Token storedToken = tokenRepository.findByToken(token).orElse(null);
+            storedToken.setLoggedOut(true);
+            tokenRepository.save(storedToken);
+            return new AuthResponse(token,"User logout successfully!");
+        }else{
+            throw new UserException("User not found!");
+        }
     }
 }

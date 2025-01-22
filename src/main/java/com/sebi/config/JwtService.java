@@ -1,19 +1,25 @@
 package com.sebi.config;
 
+import com.sebi.model.Token;
+import com.sebi.repository.TokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.Optional;
 import java.util.function.Function;
 import com.sebi.model.User;
-
+@AllArgsConstructor
 @Service
 public class JwtService {
+
+    private final TokenRepository tokenRepository;
 
     public <T> T extractClaim(String token , Function<Claims,T> resolver){
         Claims claims = extractAllClaims(token);
@@ -28,9 +34,13 @@ public class JwtService {
     public boolean isValid(String token, UserDetails user)
     {
         String username = extractUserName(token);
-
-//        boolean isValidToken = tokenRepository.findByToken(token).map(t->!t.isLoggedOut()).orElse(false);
-        return (username.equals(user.getUsername())) && !isTokenExpired(token);
+        Optional<Token> tokenFound = tokenRepository.findByToken(token);
+        if(tokenFound.isPresent())
+        {
+            return (username.equals(user.getUsername())) && !isTokenExpired(token) && !tokenFound.get().isLoggedOut();
+        }else {
+            return (username.equals(user.getUsername())) && !isTokenExpired(token);
+        }
     }
 
     private boolean isTokenExpired(String token) {

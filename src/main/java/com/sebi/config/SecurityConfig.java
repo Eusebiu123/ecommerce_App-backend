@@ -1,5 +1,6 @@
 package com.sebi.config;
 
+import com.sebi.request.CustomLogoutHandler;
 import com.sebi.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +26,12 @@ public class SecurityConfig {
     private final UserService userDetailsService;
     @Autowired
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomLogoutHandler logoutHandler;
 
-    public SecurityConfig(UserService userDetailsService,JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(UserService userDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter, CustomLogoutHandler logoutHandler) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.logoutHandler = logoutHandler;
     }
 
 
@@ -37,7 +40,7 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
-                        req -> req.requestMatchers("auth/signin/**", "auth/signup/**","/api/users/**")
+                        req -> req.requestMatchers("auth/**","/api/users/**")
                                 .permitAll()
                                 .requestMatchers("/admin/**").hasAuthority("ADMIN")
                                 .anyRequest()
