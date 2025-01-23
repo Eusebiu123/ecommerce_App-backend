@@ -3,7 +3,6 @@ package com.sebi.service;
 import com.sebi.exception.ProductException;
 import com.sebi.model.Category;
 import com.sebi.model.Product;
-import com.sebi.model.User;
 import com.sebi.repository.CategoryRepository;
 import com.sebi.repository.ProductRepository;
 import com.sebi.request.CreateProductRequest;
@@ -31,32 +30,21 @@ public class ProductServiceImplementation implements ProductService{
     }
     @Override
     public Product createProduct(CreateProductRequest req) {
-//        System.out.println("aici");
-//        Product P=new Product();
-//        return P;
-//        System.out.println("aici 2");
+
         Category topLevel = categoryRepository.findByName(req.getTopLavelCategory());
-//        System.out.println("aici 3");
         if(topLevel==null){
             Category topLavelCategory = new Category();
             topLavelCategory.setName(req.getTopLavelCategory());
             topLavelCategory.setLevel(1);
-
-
             topLevel=categoryRepository.save(topLavelCategory);
 
         }
-//        System.out.println("aici 2");
-//        Product P=new Product();
-//        return P;
         Category secondLevel = categoryRepository.findByNameAndParant(req.getSecondLavelCategory(),topLevel.getName());
         if(secondLevel==null){
             Category secondLavelCategory = new Category();
             secondLavelCategory.setName(req.getSecondLavelCategory());
             secondLavelCategory.setParentCategory(topLevel);
             secondLavelCategory.setLevel(2);
-
-
             secondLevel=categoryRepository.save(secondLavelCategory);
         }
         Category thirdLevel = categoryRepository.findByNameAndParant(req.getThirdLavelCategory(),secondLevel.getName());
@@ -65,8 +53,6 @@ public class ProductServiceImplementation implements ProductService{
             thirdLavelCategory.setName(req.getThirdLavelCategory());
             thirdLavelCategory.setParentCategory(secondLevel);
             thirdLavelCategory.setLevel(3);
-
-
             thirdLevel=categoryRepository.save(thirdLavelCategory);
         }
 
@@ -91,29 +77,33 @@ public class ProductServiceImplementation implements ProductService{
 
     @Override
     public String deleteProduct(Long productId) throws ProductException {
-        Product product=findProductById(productId);
-        product.getSizes().clear();
-        productRepository.delete(product);
-        return "Product deleted Successfully";
+        Optional<Product> product=findProductById(productId);
+        if(product.isPresent()){
+            product.get().getSizes().clear();
+            productRepository.delete(product.get());
+            return "Product deleted Successfully";
+        }
+        throw new ProductException("Product not found!");
     }
 
     @Override
     public Product updateProduct(Long productId, Product req) throws ProductException {
-        Product product=findProductById(productId);
-        if(req.getQuantity()!=0){
-            product.setQuantity(req.getQuantity());
+        Optional<Product> product=findProductById(productId);
+        if(product.isPresent()){
+            if(req.getQuantity()!=0){
+                product.get().setQuantity(req.getQuantity());
+            }
+            return productRepository.save(product.get());
         }
-        return productRepository.save(product);
-
+        throw new ProductException("Product not found!");
     }
 
     @Override
-    public Product findProductById(Long id) throws ProductException {
+    public Optional<Product> findProductById(Long id) throws ProductException {
         Optional<Product> opt =productRepository.findById(id);
-
         if(opt.isPresent())
         {
-            return opt.get();
+            return opt;
         }
         throw new ProductException("Product not found with id "+id);
     }

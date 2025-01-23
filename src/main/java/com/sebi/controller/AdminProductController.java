@@ -31,7 +31,7 @@ public class AdminProductController {
         ApiResponse res = new ApiResponse();
         res.setMessage("Product deleted successfully");
         res.setStatus(true);
-        return new ResponseEntity<>(res,HttpStatus.OK);
+        return new ResponseEntity<>(res,HttpStatus.ACCEPTED);
     }
 
 
@@ -48,7 +48,7 @@ public class AdminProductController {
             productService.createProduct(product);
         }
         ApiResponse res = new ApiResponse();
-        res.setMessage("product deleted successfully");
+        res.setMessage("products added successfully");
         res.setStatus(true);
 
         return new ResponseEntity<>(res,HttpStatus.CREATED);

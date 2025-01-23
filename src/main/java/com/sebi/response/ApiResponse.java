@@ -1,5 +1,8 @@
 package com.sebi.response;
 
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 public class ApiResponse {
     private String message;
 

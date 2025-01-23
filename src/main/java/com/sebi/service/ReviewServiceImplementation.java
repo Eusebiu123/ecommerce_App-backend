@@ -10,6 +10,7 @@ import com.sebi.request.ReviewRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public class ReviewServiceImplementation implements ReviewService{
 
@@ -26,14 +27,17 @@ public class ReviewServiceImplementation implements ReviewService{
 
     @Override
     public Review createReview(ReviewRequest req, User user) throws ProductException {
-        Product product = productService.findProductById(req.getProductId());
-        Review review = new Review();
-        review.setUser(user);
-        review.setProduct(product);
-        review.setReview(req.getReview());
-        review.setCreatedAt(LocalDateTime.now());
+        Optional<Product> product = productService.findProductById(req.getProductId());
+        if(product.isPresent()){
+            Review review = new Review();
+            review.setUser(user);
+            review.setProduct(product.get());
+            review.setReview(req.getReview());
+            review.setCreatedAt(LocalDateTime.now());
 
-        return reviewRepository.save(review);
+            return reviewRepository.save(review);
+        }
+       throw new ProductException("Product not found!");
     }
 
     @Override

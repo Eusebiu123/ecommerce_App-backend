@@ -6,6 +6,7 @@ import com.sebi.request.CreateProductRequest;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProductService {
     public Product createProduct(CreateProductRequest req);
@@ -14,7 +15,7 @@ public interface ProductService {
 
     public Product updateProduct(Long productId,Product req) throws ProductException;
 
-    public Product findProductById(Long id) throws ProductException;
+    public Optional<Product> findProductById(Long id) throws ProductException;
 
     public List<Product> findProductByCategory(String category);
 

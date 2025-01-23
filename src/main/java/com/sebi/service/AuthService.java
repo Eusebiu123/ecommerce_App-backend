@@ -48,7 +48,7 @@ public class AuthService {
         saveUserToken(jwt, user);
 
 
-        return new AuthResponse(jwt,"User register successfully!");
+        return new AuthResponse(jwt,"Registration successfully!");
     }
 
     private void saveUserToken(String jwt, User user) {
@@ -81,7 +81,7 @@ public class AuthService {
         revokeAllTokenByUser(user);
         saveUserToken(token,user);
 
-        return new AuthResponse(token,"User authenticated successfully!");
+        return new AuthResponse(token,"Authenticated successfully!");
     }
     private Authentication authenticate(String username, String password) {
         UserDetails userDetails = userService.loadUserByUsername(username);
@@ -104,7 +104,7 @@ public class AuthService {
             Token storedToken = tokenRepository.findByToken(token).orElse(null);
             storedToken.setLoggedOut(true);
             tokenRepository.save(storedToken);
-            return new AuthResponse(token,"User logout successfully!");
+            return new AuthResponse(token,"Logout successfully!");
         }else{
             throw new UserException("User not found!");
         }

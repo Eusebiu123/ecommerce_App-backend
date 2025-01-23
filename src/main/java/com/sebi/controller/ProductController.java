@@ -12,6 +12,9 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
+
+import static org.springframework.http.HttpStatus.CONFLICT;
 
 @RestController
 @RequestMapping("/api")
@@ -35,9 +38,13 @@ public class ProductController {
 
     @GetMapping("/products/id/{productId}")
     public ResponseEntity<Product> findProductByIdHandler(@PathVariable Long productId) throws ProductException{
-        Product product = productService.findProductById(productId);
+            Optional<Product> product = productService.findProductById(productId);
+            if(product.isPresent()) {
+                return new ResponseEntity<Product>(product.get(), HttpStatus.ACCEPTED);
+            }else {
+                throw new ProductException("Product not found with this id!");
+            }
 
-        return new ResponseEntity<Product>(product,HttpStatus.ACCEPTED);
     }
     @GetMapping("products/all")
     public ResponseEntity<List<Product>> findAllProduct(){

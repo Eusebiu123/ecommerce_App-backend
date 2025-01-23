@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -29,7 +30,7 @@ public class CartItemController {
     @Autowired
     private CartItemRepository cartItemRepository;
 
-
+    @Transactional
     @DeleteMapping("/{itemId}")
     @Operation(description = "Remove Cart Item From Cart")
     public ResponseEntity<ApiResponse> DeleteOrderHandler(@PathVariable Long itemId,
@@ -38,8 +39,8 @@ public class CartItemController {
         String username = jwtService.extractUserName(token);
         Optional<User> user = userRepository.findByUsername(username);
         if(user.isPresent()){
-            User newUser = user.get();
-            Long userId = newUser.getId();
+            Long userId = user.get().getId();
+            System.out.println("asta e userul: "+userId);
             cartItemService.removeCartItem(userId,itemId);
             ApiResponse res = new ApiResponse();
             res.setMessage("item deleted successfully");

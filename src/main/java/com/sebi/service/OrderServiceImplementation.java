@@ -104,7 +104,7 @@ public class OrderServiceImplementation  implements OrderService{
             item.setOrder(savedOrder);
             orderItemRepository.save(item);
         }
-//remove cartItems from cart
+        //remove cartItems from cart
         for(CartItem cartItem : cartItemRepository.findAll()){
             if(cartItem.getUserId().equals(user.getId())){
                 cart.getCartItems().remove(cartItem);
@@ -136,6 +136,7 @@ public class OrderServiceImplementation  implements OrderService{
         Order order = findOrderById(orderId);
         order.setOrderStatus("PLACED");
         order.getPaymentDetails().setStatus("COMPLETED");
+        orderRepository.save(order);
         return order;
     }
 

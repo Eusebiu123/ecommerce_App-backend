@@ -31,7 +31,6 @@ public class User implements UserDetails {
     private String mobile;
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
-
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<Address> address = new ArrayList<>();
 

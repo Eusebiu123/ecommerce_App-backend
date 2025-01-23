@@ -26,6 +26,7 @@ public class OrderController {
     private JwtService jwtService;
     @Autowired
     private UserRepository userRepository;
+
     @PostMapping("/")
     public ResponseEntity<Order> createOrder(@RequestBody Address shippingAddress,
                                              @RequestHeader("Authorization") String jwt) throws UserException, CartItemException {
@@ -37,6 +38,21 @@ public class OrderController {
             User newUser = user.get();
             Order order = orderService.createOrder(newUser,shippingAddress);
             return new ResponseEntity<Order>(order, HttpStatus.CREATED);
+        }else {
+            throw new UserException("User not found!");
+        }
+    }
+    @PostMapping("/placeOrder/{orderId}")
+    public ResponseEntity<Order> placeOrder(@PathVariable Long orderId,
+                                             @RequestHeader("Authorization") String jwt) throws UserException, OrderException {
+        String token = jwtService.extractBearer(jwt);
+        String username = jwtService.extractUserName(token);
+        Optional<User> user = userRepository.findByUsername(username);
+        if(user.isPresent())
+        {
+            User newUser = user.get();
+            Order order = orderService.placedOrder(orderId);
+            return new ResponseEntity<Order>(order, HttpStatus.ACCEPTED);
         }else {
             throw new UserException("User not found!");
         }

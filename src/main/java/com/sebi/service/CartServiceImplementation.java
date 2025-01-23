@@ -11,6 +11,7 @@ import com.sebi.request.AddItemRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -41,27 +42,30 @@ public class CartServiceImplementation implements CartService {
     public String addCartItem(Long userId, AddItemRequest req) throws ProductException {
 
         Cart cart = cartRepository.findByUserId(userId);
-        Product product = productService.findProductById(req.getProductId());
+        Optional<Product> product = productService.findProductById(req.getProductId());
+        if(product.isPresent()){
+            CartItem isPresent = cartItemService.isCartItemExist(cart,product.get(),req.getSize(),userId);
 
-        CartItem isPresent = cartItemService.isCartItemExist(cart,product,req.getSize(),userId);
+            if(isPresent==null){
+                CartItem cartItem = new CartItem();
+                cartItem.setProduct(product.get());
+                cartItem.setCart(cart);
+                cartItem.setQuantity(req.getQuantity());
+                cartItem.setUserId(userId);
 
-        if(isPresent==null){
-            CartItem cartItem = new CartItem();
-            cartItem.setProduct(product);
-            cartItem.setCart(cart);
-            cartItem.setQuantity(req.getQuantity());
-            cartItem.setUserId(userId);
+                int price = req.getQuantity()*product.get().getDiscountedPrice();
+                cartItem.setPrice(price);
+                cartItem.setSize(req.getSize());
 
-            int price = req.getQuantity()*product.getDiscountedPrice();
-            cartItem.setPrice(price);
-            cartItem.setSize(req.getSize());
+                CartItem createdCartItem = cartItemService.createCartItem(cartItem);
+                cart.getCartItems().add(createdCartItem);
+                cartRepository.save(cart);
 
-            CartItem createdCartItem = cartItemService.createCartItem(cartItem);
-            cart.getCartItems().add(createdCartItem);
-            cartRepository.save(cart);
-
+            }
+            return "Item Add to Cart";
         }
-        return "Item Add to Cart";
+
+    throw new ProductException("Product not found!");
 
     }
 
