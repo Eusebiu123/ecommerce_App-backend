@@ -30,18 +30,18 @@ public class AuthController {
     private CartService cartService;
     private final AuthService userService;
 
+
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> createUserHandler(@RequestBody User user) throws UserException{
-        AuthResponse authResponse =userService.register(user);
-        return new ResponseEntity<AuthResponse>(authResponse, HttpStatus.CREATED);
-
-
+    public ResponseEntity<AuthResponse> createUserHandler(@RequestBody User user) throws UserException {
+        AuthResponse authResponse = userService.register(user);
+        authResponse.setStatusCode(HttpStatus.CREATED.value());
+        return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
     }
     @PostMapping("/signin")
-    public ResponseEntity<AuthResponse> loginUserHandler(@RequestBody User loginRequest)
-    {
+    public ResponseEntity<AuthResponse> loginUserHandler(@RequestBody User loginRequest) throws UserException {
         AuthResponse authResponse = userService.login(loginRequest);
-        return new ResponseEntity<AuthResponse>(authResponse, HttpStatus.CREATED);
+        authResponse.setStatusCode(HttpStatus.ACCEPTED.value());
+        return new ResponseEntity<AuthResponse>(authResponse, HttpStatus.ACCEPTED);
     }
     @PostMapping("/logout")
     public ResponseEntity<AuthResponse> logoutUserHandler(@RequestHeader("Authorization") String jwt) throws UserException {

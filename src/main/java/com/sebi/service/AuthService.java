@@ -33,8 +33,10 @@ public class AuthService {
     private final UserService userService;
     private final TokenRepository tokenRepository;
 
-    public AuthResponse register(User request)
-    {
+    public AuthResponse register(User request) throws UserException {
+        Optional<User> existsUser = userRepository.findByUsername(request.getUsername());
+        if(existsUser.isPresent())
+            throw new UserException("User already exists with this username!");
         User user= new User();
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
@@ -48,9 +50,8 @@ public class AuthService {
         saveUserToken(jwt, user);
 
 
-        return new AuthResponse(jwt,"Registration successfully!");
+        return new AuthResponse(jwt,"Registration successfully!",201);
     }
-
     private void saveUserToken(String jwt, User user) {
         Token token = new Token();
         token.setToken(jwt);
@@ -69,7 +70,7 @@ public class AuthService {
         tokenRepository.saveAll(validTokenListByUser);
     }
 
-    public AuthResponse login(User request)
+    public AuthResponse login(User request) throws UserException
     {
         Authentication authentication = authenticate(request.getUsername(),request.getPassword());
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -81,7 +82,7 @@ public class AuthService {
         revokeAllTokenByUser(user);
         saveUserToken(token,user);
 
-        return new AuthResponse(token,"Authenticated successfully!");
+        return new AuthResponse(token,"Authenticated successfully!",200);
     }
     private Authentication authenticate(String username, String password) {
         UserDetails userDetails = userService.loadUserByUsername(username);
@@ -104,7 +105,7 @@ public class AuthService {
             Token storedToken = tokenRepository.findByToken(token).orElse(null);
             storedToken.setLoggedOut(true);
             tokenRepository.save(storedToken);
-            return new AuthResponse(token,"Logout successfully!");
+            return new AuthResponse(token,"Logout successfully!",200);
         }else{
             throw new UserException("User not found!");
         }

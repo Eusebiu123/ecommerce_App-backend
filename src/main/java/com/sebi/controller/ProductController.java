@@ -58,6 +58,7 @@ public class ProductController {
         String res = productService.deleteProduct(productId);
         ApiResponse response = new ApiResponse();
         response.setMessage(res);
+        response.setStatus(true);
         return new ResponseEntity<ApiResponse>(response,HttpStatus.OK);
     }
 
